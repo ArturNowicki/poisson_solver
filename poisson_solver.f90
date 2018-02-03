@@ -11,21 +11,35 @@ program poissonSolver
 
     integer, parameter :: dp = selected_real_kind(15, 307)
     integer, parameter :: max_len = 512
-    integer, parameter :: in_x=600, in_y=640, in_z=21
     integer, parameter :: ms = 1000, grid_type = 1
     real(kind=dp), parameter :: bad = -99., ct = 1.e-5
 
     !--- data arrays
-    real*8, dimension(in_x, in_y, in_z) :: in_data, out_data
-    real*8, dimension(in_x, in_y) :: jnk,tmp,ilevmsk,sor,res
+    real*8, dimension(:, :, :), allocatable :: in_data, out_data
+    real*8, dimension(:, :), allocatable :: jnk,tmp,ilevmsk,sor,res
     real*8 sum2, meanv2
     real*8 bad_org
     integer i,j,init,zctr,z_lev
     integer status
+    integer in_x, in_y, in_z
     character(len=max_len) in_f_name, out_f_name
-
-    call read_input_parameters(in_f_name, out_f_name, status)
+    character(len=5) in_xs, in_ys, in_zs
+    call read_input_parameters(in_f_name, out_f_name, in_xs, in_ys, in_zs, status)
     if(status .eq. -1) call handle_error(msg_missing_program_input_err, err_missing_program_input)
+
+    read(in_xs,*)  in_x
+    read(in_ys,*)  in_y
+    read(in_zs,*)  in_z
+
+    write(*, *) in_x, in_y, in_z
+
+    allocate(in_data(in_x, in_y, in_z))
+    allocate(out_data(in_x, in_y, in_z))
+    allocate(jnk(in_x, in_y))
+    allocate(tmp(in_x, in_y))
+    allocate(ilevmsk(in_x, in_y))
+    allocate(sor(in_x, in_y))
+    allocate(res(in_x, in_y))
 
     open(101,file=trim(in_f_name),form='unformatted',status='old', & 
           convert='big_endian',access='direct',recl=in_x*in_y*in_z*8)
@@ -41,8 +55,6 @@ program poissonSolver
         init=1
         ilevmsk(:,:) = 1
         jnk(:,:) = dble(in_data(:,:, z_lev))
-        write(*, *) '***********'
-        write(*, *) minval(jnk), maxval(jnk)
 
         do i = 1,in_x
             zctr=0
@@ -67,30 +79,32 @@ program poissonSolver
             tmp = jnk
         end where
 
-        write(*,*) 'check values'
-        write(*,*) minval(tmp),maxval(tmp)
-
         !data extrapolation using poisson solver
         call extrap(tmp,ilevmsk,sor,res,in_x,in_y,ms,ct,'restart data',grid_type)
         out_data(:, :, z_lev) = tmp
 
         write(*,*) 'variable number: ',z_lev
-        write(*,*) minval(tmp)  , maxval(tmp)
         write(*,*) minval(jnk)  , maxval(jnk)
+        write(*,*) minval(tmp)  , maxval(tmp)
         init=init+1
     enddo
     write(102, rec=1) out_data
     close(102)
 end program
 
-subroutine read_input_parameters(in_f_name, out_f_name, status)
+subroutine read_input_parameters(in_f_name, out_f_name, in_x, in_y, in_z, status)
     implicit none
     character(len=512), intent(out) :: in_f_name, out_f_name
+    character(len=5) in_x, in_y, in_z
     integer, intent(out) :: status
     status = 0
     call getarg(1, in_f_name)
     call getarg(2, out_f_name)
-    if(in_f_name == '' .or. out_f_name == '') status = -1
+    call getarg(3, in_x)
+    call getarg(4, in_y)
+    call getarg(5, in_z)
+    if(in_f_name == '' .or. out_f_name == '' .or. &
+        in_x == '' .or. in_y == '' .or. in_z == '') status = -1
 end subroutine
 
 subroutine handle_error(message, status)

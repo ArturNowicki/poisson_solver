@@ -1,5 +1,5 @@
 #!/bin/bash
-# Created by Artur Nowicki on 26.01.2018.
+# Created by Artur Nowicki on 03.02.2018.
 ok_status=0
 err_missing_program_input=100
 err_f_open=101
@@ -16,32 +16,42 @@ total_tests=0
 failed_tests=0
 
 echo "Compile program."
-gfortran ../common_code/messages.f90 ../common_code/error_codes.f90 poisson_solver.f90 -g -fcheck=all -Wall -o poisson_solver
+gfortran ../common_code/messages.f90 ../common_code/error_codes.f90 poisson_solver.f90 -o poisson_solver
 if [[ $? -ne 0 ]]; then
 	exit
 fi
 
-test_in_file=${in_dir}'20180101-46800_TEMP_0600_0640_0021_0001.ieeer8'
-test_out_file=${out_dir}'20180101-46800_TEMP_0600_0640_0021_0001.ieeer8'
+test_in_file=${in_dir}'20180101-46800_SSH_0600_0640_0001_0001.ieeer8'
+test_out_file=${out_dir}'20180101-46800_SSH_0600_0640_0001_0001.ieeer8'
+x_in=600
+y_in=640
+z_in=1
 
 expected_error_code=${ok_status}
 echo "-------------------------"
-echo "Test missing all parameters"
+echo "Test missing parameters"
 ./poisson_solver ${test_in_file}
 assertNotEquals ${expected_error_code} $?
 failed_tests=$((failed_tests+$?))
 total_tests=$((total_tests+1))
 
 echo "-------------------------"
+echo "Test wrong dim parameter"
+./poisson_solver 'ban_in_file.bin' ${test_out_file} blabla ${y_in} ${z_in}
+assertNotEquals ${expected_error_code} $?
+failed_tests=$((failed_tests+$?))
+total_tests=$((total_tests+1))
+
+echo "-------------------------"
 echo "Test wrong input file"
-./poisson_solver 'ban_in_file.bin' ${test_out_file}
+./poisson_solver 'ban_in_file.bin' ${test_out_file} ${x_in} ${y_in} ${z_in}
 assertNotEquals ${expected_error_code} $?
 failed_tests=$((failed_tests+$?))
 total_tests=$((total_tests+1))
 
 echo "-------------------------"
 echo "Test wrong output file"
-./poisson_solver ${test_in_file} 'badpath/bad_out_file.bin'
+./poisson_solver ${test_in_file} 'badpath/bad_out_file.bin' ${x_in} ${y_in} ${z_in}
 assertNotEquals ${expected_error_code} $?
 failed_tests=$((failed_tests+$?))
 total_tests=$((total_tests+1))
@@ -49,7 +59,7 @@ total_tests=$((total_tests+1))
 echo "-------------------------"
 echo "Test all ok"
 expected_error_code=${ok_status}
-./poisson_solver ${test_in_file} ${test_out_file}
+./poisson_solver ${test_in_file} ${test_out_file} ${x_in} ${y_in} ${z_in}
 assertEquals ${expected_error_code} $?
 failed_tests=$((failed_tests+$?))
 total_tests=$((total_tests+1))
