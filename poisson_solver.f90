@@ -50,18 +50,19 @@ program poissonSolver
 
 !----- read in data
     do z_lev=1,in_z
-        bad_org=in_data(1,1,1)
-        write(*,*) "bad_data", bad_org
         init=1
         ilevmsk(:,:) = 1
         jnk(:,:) = dble(in_data(:,:, z_lev))
+        bad_org=jnk(10,10)
+        write(*,*) "bad_data", bad_org
+        write(*, *) bad_org==bad_org
 
         do i = 1,in_x
             zctr=0
             sum2=0.
             meanv2=0.
             do j=1,in_y
-                if(jnk(i,j) .ne. bad_org) then
+                if(jnk(i,j).ne.bad_org) then
                     zctr=zctr+1
                     sum2=sum2+jnk(i,j)
                 endif
@@ -72,7 +73,7 @@ program poissonSolver
                 meanv2=sum2/dble(zctr)
             endif
         enddo
-        where (jnk .eq. bad_org)
+        where (jnk.eq.bad_org .or. isnan(jnk))
             ilevmsk = 0
             tmp = meanv2
         elsewhere
