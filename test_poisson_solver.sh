@@ -21,8 +21,8 @@ if [[ $? -ne 0 ]]; then
 	exit
 fi
 
-test_in_file=${in_dir}'20180101-46800_SU_0600_0640_0001_0001.ieeer8'
-test_out_file=${out_dir}'20180101-46800_SU_0600_0640_0001_0001.ieeer8'
+test_in_file=${in_dir}'2018-01-01-46800_SU_0600_0640_0001_0001.ieeer8'
+test_out_file=${out_dir}'2018-01-01-46800_SU_0600_0640_0001_0001.ieeer8'
 x_in=600
 y_in=640
 z_in=1
@@ -75,11 +75,11 @@ fi
 
 echo "-------------------------"
 echo "Start actual script:"
-exit
 
 for in_file in ${in_dir}; do
 	# echo ${in_f1:0:23}
 	out_file=${in_file/${in_dir}}
+	echo ${out_file}
 	./poisson_solver ${in_file} ${out_file}
 	# ./poisson_solver ${in_path} ${in_file2} ${out_file2}
 done
