@@ -21,8 +21,8 @@ if [[ $? -ne 0 ]]; then
 	exit
 fi
 
-test_in_file=${in_dir}'2018-01-01-46800_SU_0600_0640_0001_0001.ieeer8'
-test_out_file=${out_dir}'2018-01-01-46800_SU_0600_0640_0001_0001.ieeer8'
+test_in_file=${in_dir}'2018-01-01-68400_SU_0600_0640_0001_0001.ieeer8'
+test_out_file=${out_dir}'2018-01-01-68400_SU_0600_0640_0001_0001.ieeer8'
 x_in=600
 y_in=640
 z_in=1
